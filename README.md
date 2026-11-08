@@ -3,13 +3,13 @@ Repo for the aiwp project - Project title: Generalisation of connect 4
 
 # Initial Setup :
 
-  mkdir <name> && cd <name>
-  python3 -m venv venv
-  source venv/bin/activate
-  pip install streamlit
+  mkdir <name> && cd <name> \n
+  python3 -m venv venv \n
+  source venv/bin/activate \n
+  pip install streamlit 
 
 # Activating streamlit :
 
-  in your folder with ui_main.py run:
+  in your folder with ui_main.py run: \n
   streamlit run ui_main.py
   
