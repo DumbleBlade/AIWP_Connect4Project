@@ -3,7 +3,7 @@ Repo for the aiwp project - Project title: Generalisation of connect 4
 
 # Initial Setup :
 
-  mkdir <name> && cd <name> 
+  mkdir name && cd name 
   
   python3 -m venv venv 
   
