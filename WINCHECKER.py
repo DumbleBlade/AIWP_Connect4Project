@@ -1,10 +1,19 @@
 import streamlit as st
 
-def WINCHECK(row: int, col:int) -> str:
+def WINCHECK() -> str:
+
+    if st.session_state['prev_move']:
+
+        row , col = st.session_state['prev_move'] 
+
+    else:
+
+        return 'Continue'
 
     WC = st.session_state['WC']
-    rows = st.session_state['RC'][0]
-    cols = st.session_state['RC'][1]
+    max_rows, max_cols = st.session_state['RC']
+
+    player = st.session_state['board'][row][col]
 
     axes = [(0, 1), (1, 0), (1, 1), (1, -1)]
 
@@ -14,7 +23,7 @@ def WINCHECK(row: int, col:int) -> str:
 
         r, c = row + dr, col + dc
 
-        while 0 <= r < rows and 0 <= c < cols and st.session_state['board'][r][c] == st.session_state['curr_player']:
+        while 0 <= r < max_rows and 0 <= c < max_cols and st.session_state['board'][r][c] == player:
             
             consecutive += 1
             r += dr
@@ -22,7 +31,7 @@ def WINCHECK(row: int, col:int) -> str:
 
         r, c = row - dr, col - dc
 
-        while 0 <= r < rows and 0 <= c < cols and st.session_state['board'][r][c] == st.session_state['curr_player']:
+        while 0 <= r < max_rows and 0 <= c < max_cols and st.session_state['board'][r][c] == player:
             
             consecutive += 1
 
@@ -31,7 +40,7 @@ def WINCHECK(row: int, col:int) -> str:
 
         if consecutive >= WC:
 
-            return "Win"
+            return player
 
     if 'E' not in st.session_state['board'][0]:
     
