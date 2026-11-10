@@ -42,7 +42,7 @@ if 'VS' not in st.session_state:
 
 if 'WC' not in st.session_state:
 
-    st.session_state['WC'] = 3
+    st.session_state['WC'] = 4
 
 if 'Alg' not in st.session_state:
 
@@ -66,7 +66,7 @@ if 'prev_move' not in st.session_state:
 
 if 'delay' not in st.session_state:
 
-    st.session_state['delay'] = 1
+    st.session_state['delay'] = 0.5
 
 def save_state():
 
@@ -137,6 +137,28 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 
+)
+
+st.html(
+    """
+    <style>
+
+        [data-testid="stVerticalBlock"] {
+            gap: 0.5rem;
+        }
+
+        header[data-testid="stHeader"] {
+            display: none !important;
+        }
+
+        div[data-testid="stMainBlockContainer"] {
+            padding-left: 0.2rem;
+            padding-right: 0.2rem;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+    </style>
+    """
 )
 
 #==================================================================================
@@ -221,7 +243,7 @@ with col_settings:
 
     st.title(
 
-        ":red[Sett]:yellow[ings]",
+        ":blue[Settings]",
         text_alignment = 'center'
 
     )
@@ -268,6 +290,7 @@ with col_settings:
         "Win Condition Length",
         min_value = 3,
         max_value = max(max_rows, max_cols) or 3,
+        value = 4
 
     )
 
@@ -278,31 +301,25 @@ with col_settings:
         disabled = (curr_VS != 'PvE')
 
     )
-
-    if st.toggle(
-
-        'Other settings',
-
-    ):
         
-        ED = st.slider(
+    ED = st.slider(
 
-            "Delay Between Engine Moves",
-            min_value = 0.0,
-            max_value = 5.0,
-            value = 0.0,
-            step = 0.1
+        "Delay Between Engine Moves",
+        min_value = 0.0,
+        max_value = 5.0,
+        value = 0.5,
+        step = 0.1
 
-        )
+    )
 
-        MH = st.slider(
+    MH = st.slider(
 
-            "History length",
-            min_value = 0,
-            max_value = 20,
-            value = 5
+        "History length",
+        min_value = 0,
+        max_value = 20,
+        value = 5
 
-        )
+    )
 
 
     SC = (
@@ -417,6 +434,8 @@ with col_main:
     with controls_placeholder.container():
 
         st.write("") 
+        st.write("")
+        st.write("")
 
         c1, c2, c3 = st.columns(3)
         
@@ -425,7 +444,7 @@ with col_main:
             if st.button(
 
                 "Undo", 
-                use_container_width = True, 
+                width = 'stretch', 
                 disabled = (st.session_state['hist_idx'] <= 0)
 
             ):
@@ -445,7 +464,7 @@ with col_main:
                 if st.button(
 
                     "Redo", 
-                    use_container_width = True, 
+                    width = 'stretch', 
                     disabled = (st.session_state['hist_idx'] >= len(st.session_state['history']) - 1)
 
                 ):
@@ -463,7 +482,7 @@ with col_main:
                 if st.button(
                     
                     "Play/Pause", 
-                    use_container_width = True,
+                    width = 'stretch',
                     type = 'primary'
                 
                 ):
@@ -480,7 +499,7 @@ with col_main:
 
             with status_placeholder.container():
 
-                with st.spinner("Engine is thinking..."):
+                with st.spinner("Engine is thinking"):
 
                     EngineMove()
             
@@ -494,8 +513,13 @@ with col_main:
 
                 with status_placeholder.container():
 
-                    with st.spinner(f"Player {st.session_state['curr_player']} is thinking..."):
+                    with st.spinner(f"Player {st.session_state['curr_player']} is thinking"):
 
                         EngineMove()
                 
                 st.rerun()
+                
+#presets - run all 3 algorithms show time taken for each, obc EvE mode
+#run variable EvE where u pit minmax vs alphabeta, alphabeta vs ac3 
+#new page contains this, shows graph - Time vs increasing rows and cols (time till completion)
+#who wins more in variable EvE, graph for speed of win vs increasing rows and cols
