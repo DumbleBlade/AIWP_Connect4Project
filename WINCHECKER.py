@@ -1,51 +1,136 @@
-import streamlit as st
+def ToBitboards(board, rows: int, cols: int, WC: int = 4) -> tuple[int, int]:
 
-def WINCHECK() -> str:
+    r_bits = 0
+    y_bits = 0
+    stride = rows + WC
 
-    if st.session_state['prev_move']:
+    for i in range(rows):
 
-        row , col = st.session_state['prev_move'] 
+        for j in range(cols):
 
-    else:
+            cell = board[i][j]
+
+            if cell == "Y":
+
+                y_bits |= 1 << (j * stride + (rows - 1 - i))
+
+            elif cell == "R":
+
+                r_bits |= 1 << (j * stride + (rows - 1 - i))
+
+    return r_bits, y_bits
+
+
+def WINCHECKb(Rbits: int, Ybits: int, rows: int, cols: int, WC: int) -> str:
+
+    h = rows + WC
+
+    for player, bb in (('R', Rbits), ('Y', Ybits)):
+
+        for stride in (1, h, h + 1, h - 1):
+
+            temp = bb
+            shift = 1
+
+            while (shift << 1) <= WC:
+
+                temp &= temp >> (shift * stride)
+                shift <<= 1
+
+            rem = WC - shift
+
+            if rem > 0:
+
+                temp &= temp >> (rem * stride)
+
+            if temp != 0:
+
+                return player
+
+    full_mask = 0
+    col_bits = (1 << rows) - 1
+
+    for c in range(cols):
+
+        full_mask |= col_bits << (c * h)
+
+    if (Rbits | Ybits) == full_mask:
+        
+        return 'Draw'
+
+    return 'Continue'
+
+def WINCHECKn(board, last_move, WC):
+
+    rows = len(board)
+    cols = len(board[0])
+    directions = ((0, 1), (1, 0), (1, 1), (1, -1))
+
+    if last_move:
+
+        r0, c0 = last_move
+        player = board[r0][c0]
+
+        if player in ('R', 'Y'):
+
+            for dr, dc in directions:
+
+                count = 1
+
+                for step in (1, -1):
+
+                    r = r0 + dr * step
+                    c = c0 + dc * step
+
+                    while 0 <= r < rows and 0 <= c < cols and board[r][c] == player:
+
+                        count += 1
+
+                        if count >= WC:
+
+                            return player
+
+                        r += dr * step
+                        c += dc * step
+
+        if 'E' not in board[0]:
+
+            return 'Draw'
 
         return 'Continue'
 
-    WC = st.session_state['WC']
-    max_rows, max_cols = st.session_state['RC']
+    for r in range(rows):
 
-    player = st.session_state['board'][row][col]
+        for c in range(cols):
 
-    axes = [(0, 1), (1, 0), (1, 1), (1, -1)]
+            player = board[r][c]
 
-    for dr, dc in axes:
+            if player == 'E':
 
-        consecutive = 1
+                continue
 
-        r, c = row + dr, col + dc
+            for dr, dc in directions:
 
-        while 0 <= r < max_rows and 0 <= c < max_cols and st.session_state['board'][r][c] == player:
-            
-            consecutive += 1
-            r += dr
-            c += dc
+                end_r = r + (WC - 1) * dr
+                end_c = c + (WC - 1) * dc
 
-        r, c = row - dr, col - dc
+                if 0 <= end_r < rows and 0 <= end_c < cols:
 
-        while 0 <= r < max_rows and 0 <= c < max_cols and st.session_state['board'][r][c] == player:
-            
-            consecutive += 1
+                    won = True
 
-            r -= dr
-            c -= dc
+                    for i in range(1, WC):
 
-        if consecutive >= WC:
+                        if board[r + i * dr][c + i * dc] != player:
 
-            return player
+                            won = False
+                            break
 
-    if 'E' not in st.session_state['board'][0]:
-    
-        return "Draw"
+                    if won:
 
-    return "Continue"
-        
+                        return player
 
+    if 'E' not in board[0]:
+
+        return 'Draw'
+
+    return 'Continue'
