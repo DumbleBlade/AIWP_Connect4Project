@@ -351,7 +351,10 @@ with st.expander(":material/settings: Game Settings", expanded=True):
 
         with p2:
 
-            limit_mode = st.selectbox("Constraint", options=['Depth', 'Time', 'Both'], index=['Depth', 'Time', 'Both'].index(st.session_state['limit_mode']))
+            is_idnab = (alg == 'IDNAB')
+            mode_opts = ['Depth', 'Time', 'Both'] if is_idnab else ['Depth']
+            def_mode = st.session_state['limit_mode'] if st.session_state['limit_mode'] in mode_opts else 'Depth'
+            limit_mode = st.selectbox("Constraint", options=mode_opts, index=mode_opts.index(def_mode), disabled=(not is_idnab))
 
         with p3:
 
@@ -359,7 +362,7 @@ with st.expander(":material/settings: Game Settings", expanded=True):
 
         with p4:
 
-            time_limit = st.number_input("Time Limit (s)", min_value=0.1, max_value=60.0, value=float(st.session_state['time_limit']), step=0.1, disabled=(limit_mode == 'Depth'))
+            time_limit = st.number_input("Time Limit (s)", min_value=0.1, max_value=60.0, value=float(st.session_state['time_limit']), step=0.1, disabled=(limit_mode == 'Depth' or not is_idnab))
 
         with p5:
 
@@ -379,8 +382,15 @@ with st.expander(":material/settings: Game Settings", expanded=True):
 
         with e2:
 
-            limit_mode_y = st.selectbox("Yellow Constraint", options=['Depth', 'Time', 'Both'], index=['Depth', 'Time', 'Both'].index(st.session_state['limit_mode_y']))
-            limit_mode_r = st.selectbox("Red Constraint", options=['Depth', 'Time', 'Both'], index=['Depth', 'Time', 'Both'].index(st.session_state['limit_mode_r']))
+            is_idnab_y = (alg_y == 'IDNAB')
+            opts_y = ['Depth', 'Time', 'Both'] if is_idnab_y else ['Depth']
+            def_y = st.session_state['limit_mode_y'] if st.session_state['limit_mode_y'] in opts_y else 'Depth'
+            limit_mode_y = st.selectbox("Yellow Constraint", options=opts_y, index=opts_y.index(def_y), disabled=(not is_idnab_y))
+
+            is_idnab_r = (alg_r == 'IDNAB')
+            opts_r = ['Depth', 'Time', 'Both'] if is_idnab_r else ['Depth']
+            def_r = st.session_state['limit_mode_r'] if st.session_state['limit_mode_r'] in opts_r else 'Depth'
+            limit_mode_r = st.selectbox("Red Constraint", options=opts_r, index=opts_r.index(def_r), disabled=(not is_idnab_r))
 
         with e3:
 
@@ -389,8 +399,8 @@ with st.expander(":material/settings: Game Settings", expanded=True):
 
         with e4:
 
-            time_y = st.number_input("Yellow Time Limit (s)", min_value=0.1, max_value=60.0, value=float(st.session_state['time_y']), step=0.1, disabled=(limit_mode_y == 'Depth'))
-            time_r = st.number_input("Red Time Limit (s)", min_value=0.1, max_value=60.0, value=float(st.session_state['time_r']), step=0.1, disabled=(limit_mode_r == 'Depth'))
+            time_y = st.number_input("Yellow Time Limit (s)", min_value=0.1, max_value=60.0, value=float(st.session_state['time_y']), step=0.1, disabled=(limit_mode_y == 'Depth' or not is_idnab_y))
+            time_r = st.number_input("Red Time Limit (s)", min_value=0.1, max_value=60.0, value=float(st.session_state['time_r']), step=0.1, disabled=(limit_mode_r == 'Depth' or not is_idnab_r))
 
     st.write("")
 

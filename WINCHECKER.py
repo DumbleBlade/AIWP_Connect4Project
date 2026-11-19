@@ -2,7 +2,7 @@ def ToBitboards(board, rows: int, cols: int, WC: int = 4) -> tuple[int, int]:
 
     r_bits = 0
     y_bits = 0
-    stride = rows + WC
+    stride = rows + 1
 
     for i in range(rows):
 
@@ -21,41 +21,61 @@ def ToBitboards(board, rows: int, cols: int, WC: int = 4) -> tuple[int, int]:
     return r_bits, y_bits
 
 
-def WINCHECKb(Rbits: int, Ybits: int, rows: int, cols: int, WC: int) -> str:
+def HasWon(bb: int, stride: int, WC: int) -> bool:
 
-    h = rows + WC
+    for d in (1, stride, stride + 1, stride - 1):
 
-    for player, bb in (('R', Rbits), ('Y', Ybits)):
+        temp = bb
+        shift = 1
 
-        for stride in (1, h, h + 1, h - 1):
+        while (shift << 1) <= WC:
 
-            temp = bb
-            shift = 1
+            temp &= temp >> (shift * d)
 
-            while (shift << 1) <= WC:
+            if not temp:
 
-                temp &= temp >> (shift * stride)
-                shift <<= 1
+                break
+
+            shift <<= 1
+
+        if temp:
 
             rem = WC - shift
 
             if rem > 0:
 
-                temp &= temp >> (rem * stride)
+                temp &= temp >> (rem * d)
 
-            if temp != 0:
+            if temp:
 
-                return player
+                return True
 
-    full_mask = 0
-    col_bits = (1 << rows) - 1
+    return False
 
-    for c in range(cols):
 
-        full_mask |= col_bits << (c * h)
+def WINCHECKb(Rbits: int, Ybits: int, rows: int, cols: int, WC: int, full_mask: int | None = None) -> str:
+
+    stride = rows + 1
+
+    if HasWon(Rbits, stride, WC):
+
+        return 'R'
+
+    if HasWon(Ybits, stride, WC):
+
+        return 'Y'
+
+    if full_mask is None:
+
+        full_mask = 0
+        col_bits = (1 << rows) - 1
+
+        for c in range(cols):
+
+            full_mask |= col_bits << (c * stride)
 
     if (Rbits | Ybits) == full_mask:
-        
+
         return 'Draw'
 
     return 'Continue'
