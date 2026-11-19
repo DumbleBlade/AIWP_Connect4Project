@@ -1,10 +1,7 @@
-import time as te
 import streamlit as st
 import WINCHECKER as WR
 
-def AB(board, depth_limit: int | None, time_limit: float | None = 2.0):
-    
-    start_time = te.perf_counter()
+def AB(board, depth_limit: int | None, time_limit: float | None = None):
     ai = st.session_state["curr_player"]
     opponent = "R" if ai == "Y" else "Y"
     win_length = st.session_state["WC"]
@@ -68,17 +65,7 @@ def AB(board, depth_limit: int | None, time_limit: float | None = 2.0):
 
         return score
 
-    class SearchTimeout(Exception):
-        pass
-
-    nodes = 0
-
     def minimax(depth, alpha, beta, maximizing, last_move):
-        nonlocal nodes
-        nodes += 1
-        if time_limit is not None and (nodes & 1023) == 0 and (te.perf_counter() - start_time) >= time_limit:
-            raise SearchTimeout()
-
         result = WR.WINCHECKn(board, last_move, win_length)
 
         if result == ai:
@@ -152,31 +139,23 @@ def AB(board, depth_limit: int | None, time_limit: float | None = 2.0):
 
             return best_score, best_col
 
-    # The game may already be over or the board may be full.
     moves = valid_moves(board)
     if not moves:
         return None
 
-    best_col = moves[0]
     empty_cells = sum(h + 1 for h in col_heights)
-    max_depth = empty_cells if (depth_limit is None or depth_limit == float("inf")) else min(int(depth_limit), empty_cells)
+    search_depth = (
+        empty_cells
+        if (depth_limit is None or depth_limit == float("inf"))
+        else min(int(depth_limit), empty_cells)
+    )
 
-    for d in range(1, max_depth + 1):
-        if time_limit is not None and (te.perf_counter() - start_time) >= time_limit:
-            break
-        try:
-            score, col = minimax(
-                d,
-                float("-inf"),
-                float("inf"),
-                True,
-                st.session_state["prev_move"]
-            )
-            if col is not None:
-                best_col = col
-            if score >= win_score:
-                break
-        except SearchTimeout:
-            break
+    _, best_col = minimax(
+        search_depth,
+        float("-inf"),
+        float("inf"),
+        True,
+        st.session_state["prev_move"],
+    )
 
-    return best_col
+    return best_col if best_col is not None else moves[0]
